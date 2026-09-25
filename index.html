@@ -59,6 +59,24 @@ input[type=number]{-moz-appearance:textfield}
 .h-full{height:100%}
 .h-screen{height:100vh;height:100dvh}
 .min-h-\[16rem\]{min-height:16rem}
+.w-6{width:1.5rem}.h-6{height:1.5rem}
+.w-9{width:2.25rem}.h-9{height:2.25rem}
+.w-20{width:5rem}
+.gap-1{gap:.25rem}.gap-1\.5{gap:.375rem}
+.mb-0\.5{margin-bottom:.125rem}
+.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}
+.pt-3{padding-top:.75rem}
+.text-\[11px\]{font-size:11px;line-height:1rem}
+.bg-indigo-900\/30{background-color:rgba(49,46,129,.3)}
+.border-indigo-500\/40{border-color:rgba(99,102,241,.4)}
+.text-indigo-300{color:#a5b4fc}
+.bg-indigo-500{background-color:#6366f1}
+.border-indigo-400{border-color:#818cf8}
+.bg-amber-600{background-color:#d97706}
+.hover\:bg-amber-500:hover{background-color:#f59e0b}
+.shadow-amber-900\/20{box-shadow:0 10px 15px -3px rgba(120,53,15,.35)}
+.flex-none{flex:none}
+.select-none{-webkit-user-select:none;user-select:none}
 .h-8{height:2rem}.h-10{height:2.5rem}.h-12{height:3rem}.h-14{height:3.5rem}
 .h-16{height:4rem}.h-24{height:6rem}.h-28{height:7rem}
 .max-w-sm{max-width:24rem}.max-w-3xl{max-width:48rem}.max-w-4xl{max-width:56rem}
@@ -224,6 +242,8 @@ input[type=number]{-moz-appearance:textfield}
   .sm\:flex-row{flex-direction:row}
   .sm\:flex-none{flex:none}
   .sm\:w-auto{width:auto}
+  .sm\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sm\:flex-row{flex-direction:row}
 }
 @media (min-width:768px){
   .md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -336,6 +356,10 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
 
                 <!-- Settlement Cards Grid (Scrollable) -->
                 <div class="flex-1 min-h-0 lg:overflow-y-auto custom-scrollbar pr-2">
+                    <div class="bg-neutral-900 rounded-2xl border border-neutral-800 p-4 mb-6 shadow-lg">
+                        <h3 class="text-lg font-bold mb-3 text-neutral-300 flex items-center"><i class="fa-solid fa-chart-line mr-2 text-neutral-500"></i> Wallet Over Time</h3>
+                        <div id="wallet-chart"></div>
+                    </div>
                     <h3 class="text-lg font-bold mb-3 text-neutral-300 flex items-center"><i class="fa-solid fa-network-wired mr-2 text-neutral-500"></i> Settlement Network</h3>
                     <div id="visual-ledger-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-12">
                         <!-- Populated via JS -->
@@ -362,14 +386,14 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
     <main id="view-setup" class="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-4 md:p-6 hidden">
         <div class="max-w-3xl mx-auto space-y-6">
             <div class="bg-neutral-900 rounded-3xl border border-neutral-800 shadow-2xl p-6 md:p-8">
-                <h2 class="text-2xl font-bold mb-2">Select Active Players</h2>
-                <p class="text-neutral-400 mb-8 text-lg">Select exactly 2 or 3 active players. Folded players can sell Gwangs.</p>
-                
-                <div id="setup-players-list" class="space-y-4 mb-8">
+                <h2 class="text-2xl font-bold mb-1">Select Active Players</h2>
+                <p class="text-neutral-400 mb-5 text-base">Pick exactly 2 or 3. Folded players can sell Gwangs.</p>
+
+                <div id="setup-players-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
                     <!-- Populated via JS -->
                 </div>
 
-                <button onclick="startPlayFromSetup()" id="btn-start-play" class="w-full bg-blue-600 disabled:bg-neutral-800 disabled:text-neutral-600 text-white text-xl font-bold py-6 rounded-2xl shadow-lg btn-press transition-all" disabled>
+                <button onclick="startPlayFromSetup()" id="btn-start-play" class="w-full bg-blue-600 disabled:bg-neutral-800 disabled:text-neutral-600 text-white text-lg font-bold py-4 rounded-2xl shadow-lg btn-press transition-all" disabled>
                     Select Players
                 </button>
             </div>
@@ -378,6 +402,20 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
 
     <main id="view-play" class="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-4 md:p-6 hidden">
         <div class="max-w-4xl mx-auto space-y-6">
+
+            <!-- Stakes multiplier (stacks with each consecutive tie) -->
+            <div id="stake-card" class="bg-neutral-900 rounded-2xl border border-neutral-800 p-4 flex items-center justify-between gap-4 shadow-lg">
+                <div class="min-w-0">
+                    <div id="stake-title" class="font-bold text-base text-neutral-300">Stakes Multiplier</div>
+                    <div id="stake-sub" class="text-sm text-neutral-500 mt-0.5">Normal stakes for this round.</div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <button onclick="adjustStake(-1)" class="w-10 h-10 rounded-lg bg-neutral-950 text-neutral-400 border border-neutral-800 btn-press"><i class="fa-solid fa-minus"></i></button>
+                    <span id="stake-val" class="font-bold text-2xl w-14 text-center text-neutral-300">&times;1</span>
+                    <button onclick="adjustStake(1)" class="w-10 h-10 rounded-lg bg-neutral-950 text-neutral-400 border border-neutral-800 btn-press"><i class="fa-solid fa-plus"></i></button>
+                </div>
+            </div>
+
             
             <!-- Mid-Game Ppeok Tracking -->
             <div class="bg-neutral-900 p-6 rounded-3xl border border-neutral-800 shadow-xl">
@@ -450,9 +488,12 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
                 </div>
 
                 <!-- Submit Action -->
-                <div class="p-6 md:p-8 bg-neutral-950 border-t border-neutral-800">
+                <div class="p-6 md:p-8 bg-neutral-950 border-t border-neutral-800 space-y-4">
                     <button onclick="submitRound()" id="submit-game-btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-2xl font-bold py-6 rounded-2xl shadow-lg shadow-blue-900/20 btn-press disabled:opacity-30 disabled:cursor-not-allowed transition-all" disabled>
                         Calculate & Save Round
+                    </button>
+                    <button onclick="submitTie()" id="submit-tie-btn" class="w-full bg-amber-600 hover:bg-amber-500 text-white text-lg font-bold py-5 rounded-2xl shadow-lg shadow-amber-900/20 btn-press transition-all">
+                        No Winner &mdash; Tie (Next Round Doubles)
                     </button>
                 </div>
             </div>
@@ -568,10 +609,15 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
     </script>
 
     <script>
+        const CHART_COLORS = ['#60a5fa', '#34d399', '#fbbf24', '#f472b6', '#a78bfa', '#fb923c'];
+
         let state = {
             pricePerPoint: 1.00,
             players: [], // { id, name, points }
             history: [], // { id, gameNum, type, description, timestamp }
+            timeline: [], // [{ pts: { playerId: points } }] one entry per finished round
+            pendingMult: 1, // ties stack: each tie doubles what the next round pays
+            stats: {}, // { playerId: { played, won } } for this session
             round: {
                 phase: 'none', 
                 activeIds: [],
@@ -628,6 +674,20 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
                     if (!state.round.ppeoks) state.round.ppeoks = {};
                     if (!state.history) state.history = [];
                     if (!state.players) state.players = [];
+                    if (!Array.isArray(state.timeline)) state.timeline = [];
+                    if (!state.stats || typeof state.stats !== 'object') state.stats = {};
+                    // migrate the older boolean flags
+                    if (typeof parsed.doublePending === 'boolean' && typeof parsed.pendingMult !== 'number') {
+                        state.pendingMult = parsed.doublePending ? 2 : 1;
+                    }
+                    if (typeof state.pendingMult !== 'number' || !isFinite(state.pendingMult) || state.pendingMult < 1) {
+                        state.pendingMult = 1;
+                    }
+                    delete state.doublePending;
+                    if (typeof state.round.stakeMult !== 'number' || !isFinite(state.round.stakeMult) || state.round.stakeMult < 1) {
+                        state.round.stakeMult = state.round.isDouble ? 2 : 1;
+                    }
+                    delete state.round.isDouble;
                 }
             } catch (e) {
                 console.warn('Could not restore saved ledger:', e);
@@ -659,7 +719,10 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
                     pricePerPoint: state.pricePerPoint,
                     players: [],
                     history: [],
-                    round: { phase: 'none', activeIds: [], gwangSales: {}, ppeoks: {}, winnerId: null, basePoints: 3, goCount: 0, hasShake: false, losers: {} }
+                    timeline: [],
+                    pendingMult: 1,
+                    stats: {},
+                    round: { phase: 'none', activeIds: [], gwangSales: {}, ppeoks: {}, winnerId: null, basePoints: 3, goCount: 0, hasShake: false, stakeMult: 1, losers: {} }
                 };
                 saveData();
                 switchTab('dashboard');
@@ -768,6 +831,7 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
                 showAlert("Cannot Delete", "Please finish or discard the current round before deleting players.");
                 return;
             }
+            if (state.stats) delete state.stats[id];
             state.players = state.players.filter(p => p.id !== id);
             saveData();
             renderDashboard();
@@ -802,7 +866,82 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
             return transactions;
         }
 
+        function renderWalletChart() {
+            const host = document.getElementById('wallet-chart');
+            if (!host) return;
+
+            const tl = Array.isArray(state.timeline) ? state.timeline : [];
+            if (state.players.length === 0 || tl.length < 2) {
+                host.innerHTML = `<div class="text-center text-neutral-500 py-10 text-sm italic">Finish a round and the wallet history will chart here.</div>`;
+                return;
+            }
+
+            const series = state.players.map((p, i) => ({
+                name: p.name,
+                color: CHART_COLORS[i % CHART_COLORS.length],
+                vals: tl.map(s => ((s.pts && typeof s.pts[p.id] === 'number') ? s.pts[p.id] : 0) * state.pricePerPoint)
+            }));
+
+            const W = 720, H = 260, padL = 58, padR = 14, padT = 14, padB = 30;
+            let lo = 0, hi = 0;
+            series.forEach(s => s.vals.forEach(v => { if (v < lo) lo = v; if (v > hi) hi = v; }));
+            if (hi - lo < 1) { hi = lo + 1; }
+            const room = (hi - lo) * 0.12;
+            lo -= room; hi += room;
+
+            const n = tl.length;
+            const X = i => padL + (n === 1 ? 0 : i * (W - padL - padR) / (n - 1));
+            const Y = v => padT + (hi - v) * (H - padT - padB) / (hi - lo);
+            const money = v => (v < 0 ? '-$' : '$') + Math.abs(v).toFixed(Math.abs(v) >= 100 ? 0 : 2);
+
+            let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">`;
+
+            // horizontal gridlines
+            for (let k = 0; k <= 4; k++) {
+                const v = hi - (hi - lo) * k / 4;
+                const y = Y(v);
+                svg += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W - padR}" y2="${y.toFixed(1)}" stroke="#262626" stroke-width="1"/>`;
+                svg += `<text x="${padL - 8}" y="${(y + 4).toFixed(1)}" fill="#737373" font-size="11" text-anchor="end">${money(v)}</text>`;
+            }
+            // break-even line
+            if (lo < 0 && hi > 0) {
+                const yz = Y(0);
+                svg += `<line x1="${padL}" y1="${yz.toFixed(1)}" x2="${W - padR}" y2="${yz.toFixed(1)}" stroke="#525252" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+            }
+
+            // x axis labels (thinned out when there are many rounds)
+            const step = Math.max(1, Math.ceil((n - 1) / 8));
+            for (let i = 0; i < n; i += step) {
+                svg += `<text x="${X(i).toFixed(1)}" y="${H - 9}" fill="#737373" font-size="11" text-anchor="middle">${i === 0 ? 'Start' : i}</text>`;
+            }
+
+            // one line per player
+            series.forEach(s => {
+                const pts = s.vals.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');
+                svg += `<polyline points="${pts}" fill="none" stroke="${s.color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+                s.vals.forEach((v, i) => {
+                    svg += `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${i === n - 1 ? 4 : 2.5}" fill="${s.color}"/>`;
+                });
+            });
+
+            svg += `</svg>`;
+
+            let legend = `<div class="flex flex-wrap gap-3 mt-3">`;
+            series.forEach(s => {
+                const last = s.vals[s.vals.length - 1];
+                legend += `<div class="flex items-center gap-1.5 text-xs">
+                        <span style="width:10px;height:10px;border-radius:9999px;background:${s.color};display:inline-block"></span>
+                        <span class="text-neutral-300 font-semibold">${s.name}</span>
+                        <span class="${last > 0 ? 'text-emerald-400' : (last < 0 ? 'text-rose-400' : 'text-neutral-500')} font-bold">${money(last)}</span>
+                    </div>`;
+            });
+            legend += `</div>`;
+
+            host.innerHTML = svg + legend;
+        }
+
         function renderDashboard() {
+            renderWalletChart();
             const grid = document.getElementById('visual-ledger-grid');
             grid.innerHTML = '';
             
@@ -817,6 +956,14 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
                     const netColor = isPos ? 'text-emerald-400' : (isNeg ? 'text-rose-400' : 'text-neutral-400');
                     const borderColor = isPos ? 'border-emerald-500/30' : (isNeg ? 'border-rose-500/30' : 'border-neutral-700/50');
                     
+                    const st = statsFor(p.id);
+                    const rateColor = st.played === 0 ? 'text-neutral-600'
+                        : (st.pct >= 50 ? 'text-emerald-400' : (st.pct === 0 ? 'text-neutral-500' : 'text-neutral-300'));
+                    const rateHTML = st.played === 0
+                        ? `<div class="text-[11px] text-neutral-600 italic">no rounds yet</div>`
+                        : `<div class="font-bold text-sm ${rateColor}">${st.pct}% wins</div>
+                           <div class="text-[11px] text-neutral-500 mt-0.5">${st.won} of ${st.played}</div>`;
+
                     const relTrans = transactions.filter(t => t.from === p.id || t.to === p.id);
                     let transHTML = '';
                     
@@ -866,6 +1013,7 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
                                     <span class="font-black text-base md:text-lg ${netColor}">${formatMoney(p.points)}</span>
                                     <span class="font-semibold text-xs ${netColor} opacity-80 mt-1">${formatPoints(p.points)}</span>
                                 </div>
+                                <div class="mt-2 text-center leading-none" title="${st.won} win(s) in ${st.played} round(s) played">${rateHTML}</div>
                             </div>
 
                             <div class="w-3/5 flex flex-col justify-center pl-4 relative">
@@ -933,6 +1081,7 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
                 basePoints: isDirectPlay ? (numPlayers === 2 ? 7 : 3) : 3,
                 goCount: 0,
                 hasShake: false,
+                stakeMult: state.pendingMult || 1,
                 losers: {}
             };
             
@@ -953,23 +1102,23 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
                 const gwangCount = state.round.gwangSales[p.id] || 0;
                 
                 let html = `
-                    <div class="bg-neutral-950 border-2 ${isActive ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.1)]' : 'border-neutral-800'} rounded-2xl p-6 flex flex-col gap-5 transition-all">
-                        <div class="flex items-center justify-between cursor-pointer" onclick="toggleActiveSetup('${p.id}')">
-                            <span class="font-bold text-2xl ${isActive ? 'text-white' : 'text-neutral-500'}">${p.name}</span>
-                            <div class="w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-colors ${isActive ? 'bg-blue-600 border-blue-500' : 'bg-transparent border-neutral-700'}">
-                                <i class="fa-solid fa-check text-white text-xl ${isActive ? 'opacity-100' : 'opacity-0'}"></i>
+                    <div class="bg-neutral-950 border-2 ${isActive ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.1)]' : 'border-neutral-800'} rounded-2xl p-4 flex flex-col gap-3 transition-all">
+                        <div class="flex items-center justify-between cursor-pointer select-none" onclick="toggleActiveSetup('${p.id}')">
+                            <span class="font-bold text-lg truncate pr-2 ${isActive ? 'text-white' : 'text-neutral-500'}">${p.name}</span>
+                            <div class="w-9 h-9 rounded-lg border-2 flex items-center justify-center transition-colors shrink-0 ${isActive ? 'bg-blue-600 border-blue-500' : 'bg-transparent border-neutral-700'}">
+                                <i class="fa-solid fa-check text-white text-base ${isActive ? 'opacity-100' : 'opacity-0'}"></i>
                             </div>
                         </div>
                 `;
 
                 if (!isActive) {
                     html += `
-                        <div class="border-t border-neutral-900 pt-5 flex items-center justify-between">
-                            <span class="text-base font-bold text-neutral-400">Sold Gwangs</span>
-                            <div class="flex items-center space-x-5">
-                                <button onclick="adjustGwang('${p.id}', -1)" class="w-14 h-14 rounded-full bg-neutral-900 text-neutral-400 border border-neutral-800 btn-press text-xl"><i class="fa-solid fa-minus"></i></button>
-                                <span class="font-bold text-3xl w-8 text-center text-yellow-500">${gwangCount}</span>
-                                <button onclick="adjustGwang('${p.id}', 1)" class="w-14 h-14 rounded-full bg-neutral-900 text-neutral-400 border border-neutral-800 btn-press text-xl"><i class="fa-solid fa-plus"></i></button>
+                        <div class="border-t border-neutral-900 pt-3 flex items-center justify-between">
+                            <span class="text-sm font-semibold text-neutral-400">Sold Gwangs</span>
+                            <div class="flex items-center gap-2">
+                                <button onclick="adjustGwang('${p.id}', -1)" class="w-9 h-9 rounded-lg bg-neutral-900 text-neutral-400 border border-neutral-800 btn-press text-sm"><i class="fa-solid fa-minus"></i></button>
+                                <span class="font-bold text-xl w-6 text-center text-yellow-500">${gwangCount}</span>
+                                <button onclick="adjustGwang('${p.id}', 1)" class="w-9 h-9 rounded-lg bg-neutral-900 text-neutral-400 border border-neutral-800 btn-press text-sm"><i class="fa-solid fa-plus"></i></button>
                             </div>
                         </div>
                     `;
@@ -1048,6 +1197,7 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
         }
 
         function renderPlay() {
+            renderStakeCard();
             state.round.activeIds.forEach(id => {
                 if (!state.round.losers[id]) {
                     state.round.losers[id] = { piBak: false, gwangBak: false, meongBak: false, goBak: false };
@@ -1167,6 +1317,43 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
         function adjustGoCount(d) { state.round.goCount = Math.max(0, Math.min(10, state.round.goCount + d)); saveData(); renderPlay(); }
         function toggleShake() { state.round.hasShake = !state.round.hasShake; saveData(); renderPlay(); }
 
+        const MAX_STAKE = 64;
+
+        function clampStake(m) {
+            m = Math.pow(2, Math.round(Math.log(m) / Math.log(2)));
+            if (!isFinite(m) || m < 1) m = 1;
+            return Math.min(MAX_STAKE, m);
+        }
+
+        // Each step halves or doubles, so a mis-recorded tie streak is easy to correct.
+        function adjustStake(dir) {
+            const cur = state.round.stakeMult || 1;
+            state.round.stakeMult = clampStake(dir > 0 ? cur * 2 : cur / 2);
+            saveData();
+            renderPlay();
+        }
+
+        function renderStakeCard() {
+            const card = document.getElementById('stake-card');
+            const val = document.getElementById('stake-val');
+            const sub = document.getElementById('stake-sub');
+            if (!card || !val || !sub) return;
+
+            const m = state.round.stakeMult || 1;
+            const on = m > 1;
+            const ties = Math.round(Math.log(m) / Math.log(2));
+
+            card.className = 'rounded-2xl border p-4 flex items-center justify-between gap-4 shadow-lg transition-all '
+                + (on ? 'bg-indigo-900/30 border-indigo-500/40' : 'bg-neutral-900 border-neutral-800');
+            document.getElementById('stake-title').className = 'font-bold text-base ' + (on ? 'text-indigo-300' : 'text-neutral-300');
+            val.className = 'font-bold text-2xl w-14 text-center ' + (on ? 'text-indigo-300' : 'text-neutral-300');
+            val.innerHTML = '&times;' + m;
+            sub.className = 'text-sm mt-0.5 ' + (on ? 'text-indigo-300' : 'text-neutral-500');
+            sub.innerText = on
+                ? 'The winning hand pays ' + m + '\u00d7 after ' + ties + (ties === 1 ? ' tie.' : ' ties in a row.')
+                : 'Normal stakes for this round.';
+        }
+
         function renderLosers(isAutoWin = false) {
             const lc = document.getElementById('losers-container');
             if (!state.round.winnerId) {
@@ -1219,19 +1406,13 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
             renderPlay();
         }
 
-        function submitRound() {
-            if (!state.round.winnerId) return;
-
-            let finalPointChanges = {};
-            let historyDesc = [];
-            state.round.activeIds.forEach(id => finalPointChanges[id] = 0);
-
-            // 1. Calculate Ppeok Payouts
+        // Mid-game Ppeok collections settle whether or not anyone wins the hand.
+        function applyPpeokPayouts(finalPointChanges) {
             for (const [id, count] of Object.entries(state.round.ppeoks)) {
                 if (count === 1 || count === 2) {
                     const gainPerPlayer = count;
                     let totalGain = 0;
-                    
+
                     state.round.activeIds.forEach(oid => {
                         if (oid !== id) {
                             finalPointChanges[oid] -= gainPerPlayer;
@@ -1243,6 +1424,76 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
                     logHistory('ppeok', `<b>${pName}</b> collected ${count} pt(s) from each opponent for Ppeok.`);
                 }
             }
+        }
+
+        function commitPointChanges(finalPointChanges) {
+            Object.keys(finalPointChanges).forEach(id => {
+                const p = state.players.find(x => x.id === id);
+                if (p) p.points += finalPointChanges[id];
+            });
+        }
+
+        // A round counts as played for everyone dealt in; ties count as played, not won.
+        function recordRoundStats(winnerId) {
+            if (!state.stats || typeof state.stats !== 'object') state.stats = {};
+            state.round.activeIds.forEach(id => {
+                if (!state.stats[id]) state.stats[id] = { played: 0, won: 0 };
+                state.stats[id].played++;
+                if (id === winnerId) state.stats[id].won++;
+            });
+        }
+
+        function statsFor(id) {
+            const s = (state.stats && state.stats[id]) || null;
+            const played = s && s.played > 0 ? s.played : 0;
+            const won = s && s.won > 0 ? s.won : 0;
+            return { played, won, pct: played ? Math.round(won * 100 / played) : 0 };
+        }
+
+        // One chart point per completed round.
+        function recordTimeline() {
+            if (!Array.isArray(state.timeline)) state.timeline = [];
+            if (state.timeline.length === 0) {
+                const zero = {};
+                state.players.forEach(p => zero[p.id] = 0);
+                state.timeline.push({ pts: zero });
+            }
+            const snap = {};
+            state.players.forEach(p => snap[p.id] = p.points);
+            state.timeline.push({ pts: snap });
+            if (state.timeline.length > 200) state.timeline.shift();
+        }
+
+        function submitTie() {
+            const next = clampStake((state.round.stakeMult || 1) * 2);
+            const msg = "Nobody wins this hand. Any Ppeok collections still settle, and the next round will be set to \u00d7" + next + " stakes"
+                + (next >= MAX_STAKE ? " (the cap)." : ".");
+            showAlert("Record a Tie?", msg, true, function () {
+                let finalPointChanges = {};
+                state.round.activeIds.forEach(id => finalPointChanges[id] = 0);
+                applyPpeokPayouts(finalPointChanges);
+                commitPointChanges(finalPointChanges);
+
+                logHistory('tie', `<b>Tie</b> \u2014 no winner. Next round is set to \u00d7${next} stakes.`);
+                recordRoundStats(null);
+                recordTimeline();
+
+                state.pendingMult = next;
+                state.round.phase = 'none';
+                saveData();
+                switchTab('dashboard');
+            });
+        }
+
+        function submitRound() {
+            if (!state.round.winnerId) return;
+
+            const dbl = clampStake(state.round.stakeMult || 1);
+            let finalPointChanges = {};
+            state.round.activeIds.forEach(id => finalPointChanges[id] = 0);
+
+            // 1. Calculate Ppeok Payouts
+            applyPpeokPayouts(finalPointChanges);
 
             // 2. Main Game Resolution
             const isThreePpeok = state.round.ppeoks[state.round.winnerId] === 3;
@@ -1251,7 +1502,7 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
             const wName = state.players.find(x => x.id === state.round.winnerId).name;
 
             if (isThreePpeok) {
-                let baseScore = state.round.basePoints;
+                let baseScore = state.round.basePoints * dbl;
                 state.round.activeIds.forEach(id => {
                     if (id !== state.round.winnerId) {
                         finalPointChanges[id] -= baseScore;
@@ -1260,7 +1511,7 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
                         winDesc += `${lName} (-${baseScore}), `;
                     }
                 });
-                winDesc = `<b>${wName}</b> won via 3rd Ppeok (+${finalWinnerGain}). Losers: ` + winDesc.slice(0, -2);
+                winDesc = `<b>${wName}</b> won via 3rd Ppeok${dbl > 1 ? ` [\u00d7${dbl} Stakes]` : ''} (+${finalWinnerGain}). Losers: ` + winDesc.slice(0, -2);
             } else {
                 let handScore = state.round.basePoints;
                 if (state.round.goCount === 1) handScore += 1;
@@ -1284,11 +1535,13 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
                     if (l.gwangBak) baks++;
                     if (l.meongBak) baks++;
                     
-                    rawDebts[id] = handScore * winMult * Math.pow(2, baks);
+                    rawDebts[id] = handScore * winMult * Math.pow(2, baks) * dbl;
                 });
 
                 let finalDebts = {};
                 if (goBakId) {
+                    // Go-Bak: the player who called Go and lost pays double their own
+                    // share, AND covers what every other loser would have owed.
                     let absorbed = 0;
                     Object.keys(rawDebts).forEach(id => {
                         if (id !== goBakId) {
@@ -1297,8 +1550,11 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
                             winDesc += `${state.players.find(x => x.id === id).name} (Saved by Go-Bak), `;
                         }
                     });
-                    finalDebts[goBakId] = rawDebts[goBakId] + absorbed;
-                    winDesc += `${state.players.find(x => x.id === goBakId).name} paid Go-Bak penalty (-${finalDebts[goBakId]}), `;
+                    const ownDoubled = rawDebts[goBakId] * 2;
+                    finalDebts[goBakId] = ownDoubled + absorbed;
+                    const gbName = state.players.find(x => x.id === goBakId).name;
+                    winDesc += `${gbName} paid Go-Bak (-${finalDebts[goBakId]} = ${rawDebts[goBakId]}\u00d72 own` +
+                               (absorbed > 0 ? ` + ${absorbed} covered` : '') + `), `;
                 } else {
                     finalDebts = { ...rawDebts };
                     Object.keys(finalDebts).forEach(id => {
@@ -1315,20 +1571,20 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
                 let handDetails = `[Base: ${state.round.basePoints}`;
                 if (state.round.goCount > 0) handDetails += `, ${state.round.goCount} Go`;
                 if (state.round.hasShake) handDetails += `, Shake`;
+                if (dbl > 1) handDetails += `, \u00d7${dbl} Stakes`;
                 handDetails += `]`;
 
                 winDesc = `<b>${wName}</b> won ${handDetails} for +${finalWinnerGain} pts. Losers: ` + winDesc.slice(0, -2);
             }
             
             logHistory('win', winDesc);
-            
+
             finalPointChanges[state.round.winnerId] += finalWinnerGain;
+            commitPointChanges(finalPointChanges);
+            recordRoundStats(state.round.winnerId);
+            recordTimeline();
 
-            Object.keys(finalPointChanges).forEach(id => {
-                const p = state.players.find(x => x.id === id);
-                p.points += finalPointChanges[id];
-            });
-
+            state.pendingMult = 1;
             state.round.phase = 'none';
             saveData();
             switchTab('dashboard');
