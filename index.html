@@ -1111,18 +1111,31 @@ i[class*="fa-"]>svg{width:1em;height:1em;fill:currentColor;display:block}
                         </div>
                 `;
 
-                if (!isActive) {
+                // The second row is always present so selecting a player never
+                // changes the card's height (and never reflows the grid row).
+                html += `
+                    <div class="border-t border-neutral-900 pt-3 flex items-center justify-between">
+                `;
+
+                if (isActive) {
                     html += `
-                        <div class="border-t border-neutral-900 pt-3 flex items-center justify-between">
+                            <span class="text-sm font-semibold text-neutral-600 italic">Dealt in &mdash; not selling</span>
+                            <div class="w-9 h-9 shrink-0"></div>
+                    `;
+                } else {
+                    html += `
                             <span class="text-sm font-semibold text-neutral-400">Sold Gwangs</span>
                             <div class="flex items-center gap-2">
                                 <button onclick="adjustGwang('${p.id}', -1)" class="w-9 h-9 rounded-lg bg-neutral-900 text-neutral-400 border border-neutral-800 btn-press text-sm"><i class="fa-solid fa-minus"></i></button>
                                 <span class="font-bold text-xl w-6 text-center text-yellow-500">${gwangCount}</span>
                                 <button onclick="adjustGwang('${p.id}', 1)" class="w-9 h-9 rounded-lg bg-neutral-900 text-neutral-400 border border-neutral-800 btn-press text-sm"><i class="fa-solid fa-plus"></i></button>
                             </div>
-                        </div>
                     `;
                 }
+
+                html += `
+                    </div>
+                `;
                 html += `</div>`;
                 list.innerHTML += html;
             });
